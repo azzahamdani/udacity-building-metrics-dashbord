@@ -3,10 +3,10 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: mongodb-enterprise-operator
-  namespace: production
+  namespace: production # production
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mongodb-enterprise-operator
-  namespace: production
+  namespace: production # production

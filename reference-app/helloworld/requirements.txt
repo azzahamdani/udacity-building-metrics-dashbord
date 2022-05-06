@@ -1,1 +1,4 @@
 Flask
+jaeger_client==4.8.0
+Flask-OpenTracing==1.1.0
+flask-prometheus-metrics==1.0.0

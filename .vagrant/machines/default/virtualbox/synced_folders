@@ -1,0 +1,1 @@
+{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"C:/Users/azza/WorkDir/Udacity Nanodegree/UdacityProjects/udacity-building-metrics-dashbord","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}}}

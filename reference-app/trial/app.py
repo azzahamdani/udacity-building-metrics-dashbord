@@ -2,6 +2,10 @@ import logging
 import re
 import requests
 
+from prometheus_client import make_wsgi_app
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.serving import run_simple
+from flask_prometheus_metrics import register_metrics
 
 from flask import Flask, jsonify, render_template
 from flask_opentracing import FlaskTracing
@@ -9,16 +13,22 @@ from jaeger_client import Config
 from jaeger_client.metrics.prometheus import PrometheusMetricsFactory
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from prometheus_flask_exporter import PrometheusMetrics
+# from prometheus_flask_exporter import PrometheusMetrics
 
 
 app = Flask(__name__)
 FlaskInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()
 
-metrics = PrometheusMetrics(app)
-# static information as metric
-metrics.info("app_info", "Application info", version="1.0.3")
+# metrics = PrometheusMetrics(app)
+# # static information as metric
+# metrics.info("app_info", "Application info", version="1.0.3")
+
+# provide app's version and deploy environment/config name to set a gauge metric
+register_metrics(app, app_version="v0.1.2", app_config="staging")
+
+# Plug metrics WSGI app to your main app with dispatcher
+dispatcher = DispatcherMiddleware(app.wsgi_app, {"/metrics": make_wsgi_app()})
 
 logging.getLogger("").handlers = []
 logging.basicConfig(format="%(message)s", level=logging.DEBUG)
@@ -88,6 +98,7 @@ def trace():
 
     return jsonify(jobs_info)
 
+run_simple(hostname="0.0.0.0", port=8080, application=dispatcher)
 
-if __name__ == "__main__":
-    app.run(debug=True,)
+# if __name__ == "__main__":
+#     app.run(debug=True,)
