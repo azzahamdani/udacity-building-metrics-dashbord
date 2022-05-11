@@ -6,6 +6,8 @@
 
 ```sh
 kubectl get pods,svc -n monitoring 
+kubectl get pods,svc --namespace=default
+kubectl get pods,svc --namespace=observability
 ```
 ![image](./answer-img/monitoring.png)
 
@@ -43,7 +45,7 @@ For *request-response time* the SLI can be expressed as the real  time that take
 ## Create a Dashboard to measure our SLIs
 *TODO:* Create a dashboard to measure the uptime of the frontend and backend services We will also want to measure to measure 40x and 50x errors. Create a dashboard that show these values over a 24 hour period and take a screenshot.
 
-![image](./answer-img/Dashbord.png)
+![image](./answer-img/Dashbord-Rectified.png)
 
 ## Tracing our Flask App
 *TODO:*  We will create a Jaeger span to measure the processes on the backend. Once you fill in the span, provide a screenshot of it here. Also provide a (screenshot) sample Python file containing a trace and span code used to perform Jaeger traces on the backend service.
@@ -68,35 +70,58 @@ For *request-response time* the SLI can be expressed as the real  time that take
 
 TROUBLE TICKET
 
-Name: Internal Server Error in Backend Service for the /star endpoint 
+Name: Error on ``backend/app.py``   
 
-Date: 5/6/2022
+Date: May 9 2022, 20:56:42.727
 
-Subject: Internal Server Error in Backend related to MongoDB connectivity 
+Subject: Enable to connect to MongoDB database using DNS example-mongodb-svc.default.svc.cluster.local:27017 : Name or Service unknown
 
-Affected Area: /star endpoint in the 
+Affected Area: ``"./reference-app/backend/app.py"``, line 71, in add_star
 
 Severity: High
 
-Description: MongoDB configuration is incorrect leading to it being unreachable by the backend application . Kubernetes manifests and networking between mongodb service and backend service needs to be investigated? 
+Description: ``ServerSelectionTimeoutError`` MongoDB configuration is incorrect leading to it being unreachable by the backend application . Kubernetes manifests and networking between mongodb service and backend service needs to be investigated. 
 
+
+![image](./answer-img/ticket-error.png)
+<p align="center">
+    trace of the Ticket error 
+</p>
 
 ## Creating SLIs and SLOs
 *TODO:* We want to create an SLO guaranteeing that our application has a 99.95% uptime per month. Name four SLIs that you would use to measure the success of this SLO.
 
 **SLI**
-1. Percentage of CPU and Memory Used in the last two weeks ( Saturation ) is 80%
-2. Services Uptime is increasing in seconds ( Availability)
-3. Count of error messages per minutes is less than 20 ( Error Budget)
-4. HTTP request per Second is 0.000500 ( Traffic )
+1. Latency
+2. Traffic 
+3. Error 
+4. Saturation 
+
 
 
 ## Building KPIs for our plan
 *TODO*: Now that we have our SLIs and SLOs, create a list of 2-3 KPIs to accurately measure these metrics as well as a description of why those KPIs were chosen. We will make a dashboard for this, but first write them down here.
-1. Error Budget
-2. Uptime
-3. Latency 
-4. Saturation 
+
+``Latency/response time`` : 
+* Proportion of valid requests server faster than a threshold ; often measured on ms
+* i. e Number of HTTP requests that completed sucessully in < 250 ms / total HTTP requests
+
+``Error rate/quality``
+* Number of error HTTP requests / total number of HTTP requests
+* Number of successful HTTP requests / total of HTTP requests
+* we can also separate error rate by kind : 
+  * Number of 4XX errors requests / total number of HTTP requests
+  * Number of 5XX errors requests / total number of HTTP requets 
+
+``Availability ``
+* Proportion of valid requests served successfully 
+* i. e Number of successful HTTP requests / total of HTTP requests.
+* additionally we can measure the availability of the underlying unfrastructure ( VM or Kubernetes ) as a good indicator of the availability of the overall system
+   * i . e Number of minutes the VM is booted and accessible / total number of minutes 
+
+``Saturation``
+* the proportion of valid requests served without degradating quality
+* i . e number of successful requests where CPU and memory utilization < 80%
 
 ## Final Dashboard
 *TODO*: Create a Dashboard containing graphs that capture all the metrics of your KPIs and adequately representing your SLIs and SLOs. Include a screenshot of the dashboard here, and write a text description of what graphs are represented in the dashboard.  
